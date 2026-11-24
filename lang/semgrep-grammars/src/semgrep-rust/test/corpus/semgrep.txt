@@ -333,3 +333,291 @@ $...X;
 (source_file
   (expression_statement
     (identifier)))
+
+================================================================================
+Const traits and impls
+================================================================================
+
+pub const trait A {}
+const impl Default for B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_item
+    (visibility_modifier)
+    (type_identifier)
+    (declaration_list))
+  (impl_item
+    (type_identifier)
+    (type_identifier)
+    (declaration_list)))
+
+================================================================================
+Const trait bounds
+================================================================================
+
+fn f(g: impl [const] Fn() + [const] Destruct) {}
+fn h<T: Copy + const PartialEq>() {}
+fn k<T: ~const Clone>() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (bounded_type
+          (abstract_type
+            (const_trait_bound
+              (trait_bound_modifier)
+              (function_type
+                (type_identifier)
+                (parameters))))
+          (const_trait_bound
+            (trait_bound_modifier)
+            (type_identifier)))))
+    (block))
+  (function_item
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (trait_bounds
+          (type_identifier)
+          (const_bound
+            (type_identifier)))))
+    (parameters)
+    (block))
+  (function_item
+    (identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (trait_bounds
+          (const_trait_bound
+            (trait_bound_modifier)
+            (type_identifier)))))
+    (parameters)
+    (block)))
+
+================================================================================
+Impl restriction
+================================================================================
+
+pub impl(self) unsafe trait A {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_item
+    (visibility_modifier)
+    (impl_restriction
+      (self))
+    (type_identifier)
+    (declaration_list)))
+
+================================================================================
+Auto trait
+================================================================================
+
+pub unsafe auto trait Send {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_item
+    (visibility_modifier)
+    (type_identifier)
+    (declaration_list)))
+
+================================================================================
+Final method
+================================================================================
+
+trait A {
+  final fn f(&self);
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_item
+    (type_identifier)
+    (declaration_list
+      (function_signature_item
+        (function_modifiers)
+        (identifier)
+        (parameters
+          (self_parameter
+            (self)))))))
+
+================================================================================
+Trait alias
+================================================================================
+
+pub trait Thin = Pointee + Sized;
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (trait_alias
+    (visibility_modifier)
+    (type_identifier)
+    (type_identifier)
+    (type_identifier)))
+
+================================================================================
+Declarative macro 2
+================================================================================
+
+pub macro quote($t:tt) {
+  $t
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (decl_macro
+    (visibility_modifier)
+    (identifier)
+    (token_tree
+      (identifier)
+      (identifier))
+    (token_tree
+      (identifier))))
+
+================================================================================
+Metavariable expression and tilde
+================================================================================
+
+macro_rules! m {
+  ($a:ident, ~$b:ty) => { ${concat($a, _x)} };
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (macro_definition
+    (identifier)
+    (macro_rule
+      (token_tree_pattern
+        (token_binding_pattern
+          (metavariable)
+          (fragment_specifier))
+        (token_binding_pattern
+          (metavariable)
+          (fragment_specifier)))
+      (token_tree
+        (metavariable_expression
+          (identifier)
+          (token_tree
+            (metavariable)
+            (identifier)))))))
+
+================================================================================
+Const closure super let value attribute
+================================================================================
+
+fn f() {
+  let c = const |x| x + 1;
+  super let s = 1;
+  let d = #[cold] || 2;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters)
+    (block
+      (let_declaration
+        (identifier)
+        (closure_expression
+          (closure_parameters
+            (identifier))
+          (binary_expression
+            (identifier)
+            (integer_literal))))
+      (let_declaration
+        (identifier)
+        (integer_literal))
+      (let_declaration
+        (identifier)
+        (attribute_item
+          (attribute
+            (identifier)))
+        (closure_expression
+          (closure_parameters)
+          (integer_literal))))))
+
+================================================================================
+Safe items and extern type
+================================================================================
+
+unsafe extern "C" {
+  pub safe fn s();
+  safe static X: i32;
+  pub type Code;
+}
+fn f() {
+  let safe = 1;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (foreign_mod_item
+    (extern_modifier
+      (string_literal
+        (string_content)))
+    (declaration_list
+      (function_signature_item
+        (visibility_modifier)
+        (function_modifiers)
+        (identifier)
+        (parameters))
+      (static_item
+        (identifier)
+        (primitive_type))
+      (associated_type
+        (visibility_modifier)
+        (type_identifier))))
+  (function_item
+    (identifier)
+    (parameters)
+    (block
+      (let_declaration
+        (identifier)
+        (integer_literal)))))
+
+================================================================================
+Negative const argument and f16
+================================================================================
+
+fn f() {
+  g::<-1>();
+  let a = 1f16;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_item
+    (identifier)
+    (parameters)
+    (block
+      (expression_statement
+        (call_expression
+          (generic_function
+            (identifier)
+            (type_arguments
+              (negative_literal
+                (integer_literal))))
+          (arguments)))
+      (let_declaration
+        (identifier)
+        (integer_literal)))))

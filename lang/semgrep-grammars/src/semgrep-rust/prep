@@ -1,1 +1,31 @@
-../prep.common
+#! /usr/bin/env bash
+#
+# Import and patch up external files.
+#
+# Not the generic script: semgrep-rust parses a line comment as one token,
+# so the comment tests of tree-sitter-rust's source_files.txt expect another
+# tree. test/corpus/source_files.txt is a copy of that file with the
+# expected trees of those tests updated; refresh it when tree-sitter-rust
+# is updated.
+#
+set -eu -o pipefail
+
+mkdir -p src
+(
+  cd src
+  rm -f scanner.c
+  ln -sf ../../tree-sitter-rust/src/scanner.c .
+)
+
+mkdir -p test/corpus
+(
+  cd test/corpus
+  rm -rf inherited
+  mkdir inherited
+  # the paths are relative to test/corpus, the links to test/corpus/inherited
+  for file in ../../../tree-sitter-rust/test/corpus/*.txt; do
+    if [[ "$(basename "$file")" != source_files.txt ]]; then
+      ln -sf ../"$file" inherited/
+    fi
+  done
+)
